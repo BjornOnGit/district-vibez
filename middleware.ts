@@ -63,11 +63,15 @@ export async function middleware(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser()
 
+    if (request.nextUrl.pathname === "/admin") {
+      return response
+    }
+
     if (!user) {
       return NextResponse.redirect(new URL("/admin", request.url))
     }
 
-    // Check if user is admin
+    // Check if user is admin for protected sub-routes
     const { data: adminUser } = await supabase.from("admin_users").select("*").eq("id", user.id).single()
 
     if (!adminUser) {

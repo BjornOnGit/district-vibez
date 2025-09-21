@@ -1,5 +1,4 @@
 import { supabase } from "./client"
-import { supabaseAdmin } from "./server"
 
 export interface AdminUser {
   id: string
@@ -9,12 +8,19 @@ export interface AdminUser {
 }
 
 export async function signInAdmin(email: string, password: string) {
+  console.log("[v0] Attempting admin sign in for:", email)
+
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   })
 
-  if (error) throw error
+  console.log("[v0] Sign in response:", { data, error })
+
+  if (error) {
+    console.log("[v0] Sign in error:", error)
+    throw error
+  }
 
   // Verify user is an admin
   const { data: adminUser, error: adminError } = await supabase
@@ -32,12 +38,32 @@ export async function signInAdmin(email: string, password: string) {
 }
 
 export async function signUpAdmin(email: string, password: string) {
+  console.log("[v0] Attempting admin sign up for:", email)
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
   })
 
-  if (error) throw error
+  if (error) {
+    console.log("[v0] Sign up error:", error)
+    throw error
+  }
+
+  if (data.user) {
+    // Create admin user record
+    const { error: adminError } = await supabase.from("admin_users").insert({
+      id: data.user.id,
+      email: data.user.email,
+      role: "admin",
+    })
+
+    if (adminError) {
+      console.log("[v0] Admin user creation error:", adminError)
+      throw new Error("Failed to create admin user record")
+    }
+  }
+
   return data
 }
 
@@ -54,19 +80,6 @@ export async function getCurrentAdminUser(): Promise<AdminUser | null> {
   if (!user) return null
 
   const { data: adminUser, error } = await supabase.from("admin_users").select("*").eq("id", user.id).single()
-
-  if (error || !adminUser) return null
-  return adminUser
-}
-
-export async function getServerAdminUser(): Promise<AdminUser | null> {
-  const {
-    data: { user },
-  } = await supabaseAdmin.auth.getUser()
-
-  if (!user) return null
-
-  const { data: adminUser, error } = await supabaseAdmin.from("admin_users").select("*").eq("id", user.id).single()
 
   if (error || !adminUser) return null
   return adminUser

@@ -4,12 +4,12 @@ import type React from "react"
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader2, Shield } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { signInAdmin } from "@/lib/supabase/auth"
+import { signInAdmin, signUpAdmin } from "@/lib/supabase/auth"
 
 interface AdminLoginProps {
   onSuccess: () => void
@@ -21,23 +21,36 @@ export function AdminLogin({ onSuccess }: AdminLoginProps) {
     password: "",
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [mode, setMode] = useState<"login" | "signup">("login")
   const { toast } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
+    console.log(`[v0] ${mode} submitted with:`, formData.email)
+
     try {
-      await signInAdmin(formData.email, formData.password)
-      toast({
-        title: "Login Successful",
-        description: "Welcome to the admin dashboard",
-      })
-      onSuccess()
+      if (mode === "signup") {
+        await signUpAdmin(formData.email, formData.password)
+        toast({
+          title: "Signup Successful",
+          description: "Admin account created. You can now sign in.",
+        })
+        setMode("login")
+      } else {
+        await signInAdmin(formData.email, formData.password)
+        toast({
+          title: "Login Successful",
+          description: "Welcome to the admin dashboard",
+        })
+        onSuccess()
+      }
     } catch (error) {
+      console.log(`[v0] ${mode} error caught:`, error)
       toast({
-        title: "Login Failed",
-        description: error instanceof Error ? error.message : "Invalid credentials",
+        title: `${mode === "signup" ? "Signup" : "Login"} Failed`,
+        description: error instanceof Error ? error.message : "Operation failed",
         variant: "destructive",
       })
     } finally {
@@ -52,8 +65,10 @@ export function AdminLogin({ onSuccess }: AdminLoginProps) {
           <div className="mx-auto w-12 h-12 bg-accent rounded-full flex items-center justify-center mb-4">
             <Shield className="w-6 h-6 text-accent-foreground" />
           </div>
-          <CardTitle className="text-2xl">Admin Login</CardTitle>
-          <p className="text-muted-foreground">Access the event management dashboard</p>
+          <CardTitle className="text-2xl">{mode === "signup" ? "Create Admin Account" : "Admin Login"}</CardTitle>
+          <p className="text-muted-foreground">
+            {mode === "signup" ? "Set up your admin account to manage events" : "Access the event management dashboard"}
+          </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -87,13 +102,25 @@ export function AdminLogin({ onSuccess }: AdminLoginProps) {
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Signing in...
+                  {mode === "signup" ? "Creating Account..." : "Signing in..."}
                 </>
+              ) : mode === "signup" ? (
+                "Create Admin Account"
               ) : (
                 "Sign In"
               )}
             </Button>
           </form>
+
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => setMode(mode === "login" ? "signup" : "login")}
+              className="text-sm text-muted-foreground hover:text-foreground underline"
+            >
+              {mode === "login" ? "Need to create an admin account? Sign up" : "Already have an account? Sign in"}
+            </button>
+          </div>
         </CardContent>
       </Card>
     </div>
