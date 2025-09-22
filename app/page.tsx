@@ -5,11 +5,12 @@ import { Hero } from "@/components/hero"
 import { EventDetails } from "@/components/event-details"
 import { PartnersSection } from "@/components/partners-section"
 import { FoundationPlaylistSection } from "@/components/foundation-playlist-section"
-import { TicketForm } from "@/components/ticket-form"
 import { Modal } from "@/components/modal"
 import { Navbar } from "@/components/navbar"
 import { supabase } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { TicketSelection } from "@/components/ticket-selection"
+import { TicketCheckout } from "@/components/ticket-checkout"
 
 interface Event {
   id: string
@@ -26,6 +27,8 @@ export default function HomePage() {
   const [event, setEvent] = useState<Event | null>(null)
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [ticketFlow, setTicketFlow] = useState<"selection" | "checkout">("selection")
+  const [selectedTickets, setSelectedTickets] = useState<{ [key: string]: number }>({})
   const { toast } = useToast()
 
   useEffect(() => {
@@ -48,6 +51,22 @@ export default function HomePage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleGetTickets = (tickets: { [key: string]: number }) => {
+    setSelectedTickets(tickets)
+    setTicketFlow("checkout")
+    setIsTicketModalOpen(true)
+  }
+
+  const handleBackToSelection = () => {
+    setTicketFlow("selection")
+  }
+
+  const handleCloseModal = () => {
+    setIsTicketModalOpen(false)
+    setTicketFlow("selection")
+    setSelectedTickets({})
   }
 
   if (isLoading) {
@@ -82,8 +101,16 @@ export default function HomePage() {
       <PartnersSection />
       <FoundationPlaylistSection />
 
-      <Modal isOpen={isTicketModalOpen} onClose={() => setIsTicketModalOpen(false)} title="Purchase Tickets">
-        <TicketForm eventId={event.id} ticketPrice={event.ticket_price} availableTickets={availableTickets} />
+      <Modal
+        isOpen={isTicketModalOpen}
+        onClose={handleCloseModal}
+        title={ticketFlow === "selection" ? "Select Tickets" : ""}
+      >
+        {ticketFlow === "selection" ? (
+          <TicketSelection onGetTickets={handleGetTickets} />
+        ) : (
+          <TicketCheckout selectedTickets={selectedTickets} onBack={handleBackToSelection} onClose={handleCloseModal} />
+        )}
       </Modal>
     </main>
   )
