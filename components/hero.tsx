@@ -2,12 +2,10 @@
 
 import { Button } from "@/components/ui/button"
 import { Calendar, MapPin, Users } from "lucide-react"
+import { useRouter } from "next/navigation"
 
-interface HeroProps {
-  onBuyTickets: () => void
-}
-
-export function Hero({ onBuyTickets }: HeroProps) {
+export function Hero() {
+  const router = useRouter()
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image */}
@@ -42,7 +40,7 @@ export function Hero({ onBuyTickets }: HeroProps) {
           </div>
 
           <Button
-            onClick={onBuyTickets}
+            onClick={() => router.push("/tickets")}
             size="lg"
             className="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-8 py-4 text-lg font-semibold"
           >
