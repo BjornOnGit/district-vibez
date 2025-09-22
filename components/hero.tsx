@@ -19,17 +19,17 @@ export function Hero({ onBuyTickets }: HeroProps) {
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 text-center text-white">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 text-balance">Tech Conference 2024</h1>
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 text-balance">District Vibez Vol. 1.0</h1>
           <p className="text-xl md:text-2xl mb-8 text-balance opacity-90">
-            Join us for an exciting day of technology talks, networking, and innovation. Learn from industry experts and
-            connect with fellow tech enthusiasts.
+            Experience the ultimate fusion of music, culture, and vibes at District Vibez Vol. 1.0 – Lagos' premier
+            music festival!
           </p>
 
           {/* Quick Info */}
           <div className="flex flex-col md:flex-row items-center justify-center gap-6 mb-10 text-lg">
             <div className="flex items-center gap-2">
               <Calendar className="w-5 h-5" />
-              <span>June 15, 2024</span>
+              <span>October 11, 2025</span>
             </div>
             <div className="flex items-center gap-2">
               <MapPin className="w-5 h-5" />
