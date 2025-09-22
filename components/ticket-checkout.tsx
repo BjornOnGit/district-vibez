@@ -23,6 +23,7 @@ interface TicketCheckoutProps {
   selectedTickets: { [key: string]: number }
   onBack: () => void
   onClose: () => void
+  onUpdateTickets: (ticketId: string, quantity: number) => void
 }
 
 const ticketTypes: TicketType[] = [
@@ -72,7 +73,10 @@ export function TicketCheckout({ selectedTickets, onBack, onClose }: TicketCheck
   }
 
   const formatPrice = (price: number) => {
-    return `₦ ${(price / 100).toLocaleString()}.00`
+    return `₦ ${(price / 100).toLocaleString(undefined,{
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`
   }
 
   const getSelectedTicketName = () => {
@@ -130,6 +134,16 @@ export function TicketCheckout({ selectedTickets, onBack, onClose }: TicketCheck
     }
   }
 
+  function onUpdateTickets(firstTicketId: string | undefined, quantity: number) {
+    if (!firstTicketId) return
+    // Call the prop function to update ticket quantity
+    // Clamp quantity to minimum 0
+    const newQuantity = Math.max(0, quantity)
+    // Call the parent handler
+    if (typeof (TicketCheckout as any).props?.onUpdateTickets === "function") {
+      (TicketCheckout as any).props.onUpdateTickets(firstTicketId, newQuantity)
+    }
+  }
   return (
     <div className="max-w-4xl mx-auto p-6">
       {/* Header */}
@@ -140,9 +154,9 @@ export function TicketCheckout({ selectedTickets, onBack, onClose }: TicketCheck
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Main Content */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-3">
           {/* Ticket Summary */}
           <Card className="mb-6">
             <CardContent className="p-6">
@@ -154,11 +168,20 @@ export function TicketCheckout({ selectedTickets, onBack, onClose }: TicketCheck
                 <div className="flex items-center gap-4">
                   <span className="font-bold">{formatPrice(subtotal)}</span>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-transparent">
+                    <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-transparent" onClick={() => {
+                      const firstTicketId = Object.keys(selectedTickets).find((id) => selectedTickets[id] > 0)
+                      {firstTicketId !== undefined &&
+                        onUpdateTickets(firstTicketId, Math.max(0, selectedTickets[firstTicketId] - 1))
+                      }
+                    }}>
                       <X className="w-4 h-4" />
                     </Button>
                     <span className="font-semibold">{totalQuantity}</span>
-                    <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-transparent">
+                    <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-transparent" onClick={() => {
+                      const firstTicketId = Object.keys(selectedTickets).find((id) => selectedTickets[id] > 0)
+                      if (!firstTicketId) return
+                      onUpdateTickets(firstTicketId, selectedTickets[firstTicketId] + 1)
+                    }}>
                       <Plus className="w-4 h-4" />
                     </Button>
                   </div>
@@ -248,10 +271,10 @@ export function TicketCheckout({ selectedTickets, onBack, onClose }: TicketCheck
         </div>
 
         {/* Order Summary Sidebar */}
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 w-full">
           <Card className="sticky top-6">
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
+              <CardTitle className="flex items-center justify-between text-xl">
                 Your Order
                 <div className="flex gap-2">
                   <Button variant="ghost" size="sm" onClick={onBack}>
@@ -265,9 +288,9 @@ export function TicketCheckout({ selectedTickets, onBack, onClose }: TicketCheck
                 </div>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between">
+            <CardContent className="space-y-4 text-base">
+              <div className="space-y-3">
+                <div className="flex justify-between font-medium">
                   <span className="font-medium">Product</span>
                   <span className="font-medium">Subtotal</span>
                 </div>
