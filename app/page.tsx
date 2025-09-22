@@ -5,6 +5,7 @@ import { Hero } from "@/components/hero"
 import { EventDetails } from "@/components/event-details"
 import { TicketForm } from "@/components/ticket-form"
 import { Modal } from "@/components/modal"
+import { Navbar } from "@/components/navbar"
 import { supabase } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 
@@ -73,6 +74,7 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-background">
+      <Navbar onBuyTickets={() => setIsTicketModalOpen(true)} />
       <Hero onBuyTickets={() => setIsTicketModalOpen(true)} />
       <EventDetails />
 
