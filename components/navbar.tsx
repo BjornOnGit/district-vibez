@@ -3,13 +3,15 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ShoppingBag, Menu, X } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 interface NavbarProps {
   onBuyTickets: () => void
 }
 
-export function Navbar({ onBuyTickets }: NavbarProps) {
+export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const router = useRouter()
 
   return (
     <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
@@ -39,7 +41,7 @@ export function Navbar({ onBuyTickets }: NavbarProps) {
             <div className="flex items-center space-x-4">
               <ShoppingBag className="h-5 w-5 text-gray-900" />
               <Button
-                onClick={onBuyTickets}
+                onClick={() => router.push("/tickets")}
                 className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-6 py-2 rounded-full transition-colors"
               >
                 🎫 Tickets
@@ -73,7 +75,7 @@ export function Navbar({ onBuyTickets }: NavbarProps) {
               </a>
               <div className="px-3 py-2">
                 <Button
-                  onClick={onBuyTickets}
+                  onClick={() => router.push("/tickets")}
                   className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2 rounded-full"
                 >
                   🎫 Tickets

@@ -95,13 +95,13 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <Navbar onBuyTickets={() => setIsTicketModalOpen(true)} />
-      <Hero onBuyTickets={() => setIsTicketModalOpen(true)} />
+      <Navbar />
+      <Hero />
       <EventDetails />
-      <PartnersSection />
+      {/* <PartnersSection /> */}
       <FoundationPlaylistSection />
 
-      <Modal
+      {/* <Modal
         isOpen={isTicketModalOpen}
         onClose={handleCloseModal}
         title={ticketFlow === "selection" ? "Select Tickets" : ""}
@@ -111,7 +111,7 @@ export default function HomePage() {
         ) : (
           <TicketCheckout selectedTickets={selectedTickets} onBack={handleBackToSelection} onClose={handleCloseModal} />
         )}
-      </Modal>
+      </Modal> */}
     </main>
   )
 }
