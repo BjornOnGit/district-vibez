@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react"
 import { Hero } from "@/components/hero"
 import { EventDetails } from "@/components/event-details"
+import { PartnersSection } from "@/components/partners-section"
+import { FoundationPlaylistSection } from "@/components/foundation-playlist-section"
 import { TicketForm } from "@/components/ticket-form"
 import { Modal } from "@/components/modal"
 import { Navbar } from "@/components/navbar"
@@ -77,6 +79,8 @@ export default function HomePage() {
       <Navbar onBuyTickets={() => setIsTicketModalOpen(true)} />
       <Hero onBuyTickets={() => setIsTicketModalOpen(true)} />
       <EventDetails />
+      <PartnersSection />
+      <FoundationPlaylistSection />
 
       <Modal isOpen={isTicketModalOpen} onClose={() => setIsTicketModalOpen(false)} title="Purchase Tickets">
         <TicketForm eventId={event.id} ticketPrice={event.ticket_price} availableTickets={availableTickets} />
