@@ -31,11 +31,11 @@ export function Hero() {
             </div>
             <div className="flex items-center gap-2">
               <MapPin className="w-5 h-5" />
-              <span>Lagos Convention Centre</span>
+              <span>VSP Lounge, Ikeja, Lagos</span>
             </div>
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5" />
-              <span>500 Attendees</span>
+              <span>300+ Attendees</span>
             </div>
           </div>
 

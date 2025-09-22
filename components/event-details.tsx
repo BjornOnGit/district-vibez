@@ -6,27 +6,27 @@ export function EventDetails() {
     {
       icon: Calendar,
       title: "Date",
-      description: "Saturday, December 28, 2024",
+      description: "Saturday, October 11, 2025",
     },
     {
       icon: Clock,
       title: "Time",
-      description: "6:00 PM - 2:00 AM WAT",
+      description: "7:00 PM - Dawn",
     },
     {
       icon: MapPin,
       title: "Location",
-      description: "Tafawa Balewa Square, Lagos Island, Lagos",
+      description: "VSP Lounge, Ikeja, Lagos",
     },
     {
       icon: Users,
       title: "Capacity",
-      description: "5,000 Party Lovers",
+      description: "300+ Party Lovers",
     },
     {
       icon: Music,
       title: "Artists",
-      description: "15+ Top Performers",
+      description: "4 Top Performers",
     },
     {
       icon: Heart,
