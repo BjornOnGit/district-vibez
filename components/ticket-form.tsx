@@ -31,39 +31,15 @@ export function TicketForm({ eventId, ticketPrice, availableTickets }: TicketFor
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-
-    try {
-      const response = await fetch("/api/initiate-payment", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formData,
-          eventId,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to initiate payment")
-      }
-
-      // Redirect to Paystack checkout
-      window.location.href = data.authorization_url
-    } catch (error) {
-      toast({
-        title: "Payment Error",
-        description: error instanceof Error ? error.message : "Something went wrong",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
+    // Store form data in sessionStorage and navigate to checkout page
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("ticketFormData", JSON.stringify({ ...formData, eventId }))
+      window.location.href = "/tickets/checkout"
     }
+    setIsLoading(false)
   }
 
   const totalAmount = formData.quantity * ticketPrice

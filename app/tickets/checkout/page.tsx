@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { TicketCheckout } from "@/components/ticket-checkout"
+import TicketCheckout from "@/components/ticket-checkout"
 
 export default function TicketCheckoutPage() {
   const [selectedTickets, setSelectedTickets] = useState<{ [key: string]: number }>({})
