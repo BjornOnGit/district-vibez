@@ -13,16 +13,17 @@ interface TicketType {
   name: string
   price: number
 }
+
 interface AttendeeInfo {
-  name: string
-  email: string
+  name: string;
+  email: string;
 }
 
 interface TicketCheckoutProps {
-  selectedTickets: { [key: string]: number }
-  onBack: () => void
-  onClose: () => void
-  onUpdateTickets: () => void
+  selectedTickets: { [key: string]: number };
+  onBack: () => void;
+  onClose: () => void;
+  onUpdateTickets: (ticketId: string, quantity: number) => void;
 }
 
 
@@ -41,45 +42,48 @@ const ticketTypes: TicketType[] = [
 
 const SERVICE_FEE = 49500 // 495.00 in kobo
 
-  const TicketCheckout = ({ onBack, onClose }: TicketCheckoutProps) => {
-    const [attendees, setAttendees] = useState<AttendeeInfo[]>([])
-    const [isLoading, setIsLoading] = useState(false)
-    const [formData, setFormData] = useState<any>(null)
-    const { toast } = useToast()
 
-  // Read form data from sessionStorage on mount
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = sessionStorage.getItem("ticketFormData")
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        setFormData(parsed)
-        setAttendees([{ name: parsed.name, email: parsed.email }])
-      }
-    }
-  }, [])
+export const TicketCheckout = ({ selectedTickets, onBack, onClose, onUpdateTickets }: TicketCheckoutProps) => {
+  const [attendees, setAttendees] = useState<AttendeeInfo[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast()
 
   // Calculate totals
-  const subtotal = formData ? (formData.quantity * (formData.ticketPrice || 0)) : 0
-  const totalQuantity = formData ? formData.quantity : 0
+  const subtotal = Object.entries(selectedTickets).reduce((total, [ticketId, quantity]) => {
+    const ticket = ticketTypes.find((t) => t.id === ticketId)
+    return total + (ticket ? ticket.price * quantity : 0)
+  }, 0)
+
+  const totalQuantity = Object.values(selectedTickets).reduce((sum, qty) => sum + qty, 0)
   const total = subtotal + SERVICE_FEE
 
-  const updateAttendee = (index: number, field: keyof AttendeeInfo, value: string) => {
-    setAttendees((prev) => prev.map((attendee, i) => (i === index ? { ...attendee, [field]: value } : attendee)))
+  // Initialize attendees array when ticket quantity changes
+  useEffect(() => {
+    const initialAttendees: AttendeeInfo[] = []
+    for (let i = 0; i < totalQuantity; i++) {
+      initialAttendees.push({ name: "", email: "" })
+    }
+    setAttendees(initialAttendees)
+  }, [totalQuantity])
+
+
+  const addAttendee = () => {
+    setAttendees((prev) => [...prev, { name: "", email: "" }])
   }
 
-  const removeAttendee = (index: number) => {
-    setAttendees((prev) => prev.filter((_, i) => i !== index))
-  }
 
   const formatPrice = (price: number) => {
-    return `₦ ${(price / 100).toLocaleString(undefined,{
+    return `₦ ${(price / 100).toLocaleString(undefined, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`
   }
 
-  // Removed getSelectedTicketName function as it is no longer needed
+  const getSelectedTicketName = () => {
+    const firstTicketId = Object.keys(selectedTickets).find((id) => selectedTickets[id] > 0)
+    const ticket = ticketTypes.find((t) => t.id === firstTicketId)
+    return ticket?.name || "Ticket"
+  }
 
   const handleCheckout = async () => {
     // Validate all attendees have required info
@@ -103,7 +107,7 @@ const SERVICE_FEE = 49500 // 495.00 in kobo
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...formData,
+          selectedTickets,
           attendees,
           subtotal,
           serviceFee: SERVICE_FEE,
@@ -129,9 +133,18 @@ const SERVICE_FEE = 49500 // 495.00 in kobo
       setIsLoading(false)
     }
   }
-    function onUpdateTickets(firstTicketId: string | undefined, quantity: number) {
-    // Removed onUpdateTickets function as it is no longer needed
+
+  const updateAttendee = (index: number, field: keyof AttendeeInfo, value: string) => {
+    setAttendees((prev) => prev.map((attendee, i) => (i === index ? { ...attendee, [field]: value } : attendee)))
   }
+
+  const removeAttendee = (index: number) => {
+    setAttendees((prev) => prev.filter((_, i) => i !== index))
+  }
+
+
+  // Removed getSelectedTicketName function as it is no longer needed
+
   
 return (
   <div className="max-w-4xl mx-auto p-6">
@@ -170,14 +183,18 @@ return (
                 </div>
 
                 <div className="space-y-3 pt-2">
-                  {formData && (
-                    <div className="flex justify-between text-sm py-1">
-                      <span>
-                        Ticket × {formData.quantity}
-                      </span>
-                      <span>{formatPrice((formData.ticketPrice || 0) * formData.quantity)}</span>
-                    </div>
-                  )}
+                  {Object.entries(selectedTickets).map(([ticketId, quantity]) => {
+                    const ticket = ticketTypes.find((t) => t.id === ticketId)
+                    if (!ticket || quantity <= 0) return null
+                    return (
+                      <div key={ticketId} className="flex justify-between text-sm py-1">
+                        <span>
+                          {ticket.name} × {quantity}
+                        </span>
+                        <span>{formatPrice(ticket.price * quantity)}</span>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
 
