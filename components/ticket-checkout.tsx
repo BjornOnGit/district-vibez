@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -15,17 +15,16 @@ interface TicketType {
 }
 
 interface AttendeeInfo {
-  name: string;
-  email: string;
+  name: string
+  email: string
 }
 
 interface TicketCheckoutProps {
-  selectedTickets: { [key: string]: number };
-  onBack: () => void;
-  onClose: () => void;
-  onUpdateTickets: (ticketId: string, quantity: number) => void;
+  selectedTickets: { [key: string]: number }
+  onBack: () => void
+  onClose: () => void
+  onUpdateTickets: (ticketId: string, quantity: number) => void
 }
-
 
 const ticketTypes: TicketType[] = [
   {
@@ -42,8 +41,7 @@ const ticketTypes: TicketType[] = [
 
 const SERVICE_FEE = 49500 // 495.00 in kobo
 
-
-export const TicketCheckout = ({ selectedTickets, onBack, onClose, onUpdateTickets }: TicketCheckoutProps) => {
+export function TicketCheckout({ selectedTickets, onBack, onClose, onUpdateTickets }: TicketCheckoutProps) {
   const [attendees, setAttendees] = useState<AttendeeInfo[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
@@ -57,23 +55,25 @@ export const TicketCheckout = ({ selectedTickets, onBack, onClose, onUpdateTicke
   const totalQuantity = Object.values(selectedTickets).reduce((sum, qty) => sum + qty, 0)
   const total = subtotal + SERVICE_FEE
 
-  // Initialize attendees array when ticket quantity changes
-  useEffect(() => {
+  // Initialize attendees array
+  useState(() => {
     const initialAttendees: AttendeeInfo[] = []
     for (let i = 0; i < totalQuantity; i++) {
       initialAttendees.push({ name: "", email: "" })
     }
     setAttendees(initialAttendees)
-  }, [totalQuantity])
+  })
 
-
-  const addAttendee = () => {
-    setAttendees((prev) => [...prev, { name: "", email: "" }])
+  const updateAttendee = (index: number, field: keyof AttendeeInfo, value: string) => {
+    setAttendees((prev) => prev.map((attendee, i) => (i === index ? { ...attendee, [field]: value } : attendee)))
   }
 
+  const removeAttendee = (index: number) => {
+    setAttendees((prev) => prev.filter((_, i) => i !== index))
+  }
 
   const formatPrice = (price: number) => {
-    return `₦ ${(price / 100).toLocaleString(undefined, {
+    return `₦ ${(price / 100).toLocaleString(undefined,{
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`
@@ -134,20 +134,9 @@ export const TicketCheckout = ({ selectedTickets, onBack, onClose, onUpdateTicke
     }
   }
 
-  const updateAttendee = (index: number, field: keyof AttendeeInfo, value: string) => {
-    setAttendees((prev) => prev.map((attendee, i) => (i === index ? { ...attendee, [field]: value } : attendee)))
-  }
 
-  const removeAttendee = (index: number) => {
-    setAttendees((prev) => prev.filter((_, i) => i !== index))
-  }
-
-
-  // Removed getSelectedTicketName function as it is no longer needed
-
-  
-return (
-  <div className="max-w-4xl mx-auto p-6">
+  return (
+    <div className="max-w-4xl mx-auto p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">District Vibez Block Party Presents Respect the DJ – Vol.2 Tickets</h1>
@@ -182,20 +171,19 @@ return (
                   <span className="font-medium">Subtotal</span>
                 </div>
 
-                <div className="space-y-3 pt-2">
-                  {Object.entries(selectedTickets).map(([ticketId, quantity]) => {
-                    const ticket = ticketTypes.find((t) => t.id === ticketId)
-                    if (!ticket || quantity <= 0) return null
-                    return (
-                      <div key={ticketId} className="flex justify-between text-sm py-1">
-                        <span>
-                          {ticket.name} × {quantity}
-                        </span>
-                        <span>{formatPrice(ticket.price * quantity)}</span>
-                      </div>
-                    )
-                  })}
-                </div>
+                {Object.entries(selectedTickets).map(([ticketId, quantity]) => {
+                  const ticket = ticketTypes.find((t) => t.id === ticketId)
+                  if (!ticket || quantity === 0) return null
+
+                  return (
+                    <div key={ticketId} className="flex justify-between text-sm py-1">
+                      <span>
+                        {ticket.name} × {quantity}
+                      </span>
+                      <span>{formatPrice(ticket.price * quantity)}</span>
+                    </div>
+                  )
+                })}
               </div>
 
               <div className="border-t pt-4 space-y-3">
@@ -229,6 +217,17 @@ return (
                       <span className="font-semibold">
                         Attendee {index + 1}
                       </span>
+                      {attendees.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeAttendee(index)}
+                          className="text-gray-500 hover:text-red-500 flex items-center"
+                        >
+                          Remove <X className="w-4 h-4 ml-1" />
+                        </Button>
+                      )}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
@@ -274,6 +273,7 @@ return (
                 >
                   {isLoading ? "Processing..." : "Checkout Now"}
                 </Button>
+
               </div>
             </CardContent>
           </Card>
