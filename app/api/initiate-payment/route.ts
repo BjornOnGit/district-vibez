@@ -4,7 +4,14 @@ import { initializePaystack } from "@/lib/paystack"
 
 export async function POST(request: NextRequest) {
   try {
-    const { selectedTickets, attendees, subtotal, serviceFee, total, eventId } = await request.json()
+    const { selectedTickets, attendees, subtotal, serviceFee, total, eventId } = await request.json() as {
+      selectedTickets: Record<string, number>,
+      attendees: Array<{ name: string, email: string, phone?: string }>,
+      subtotal: number,
+      serviceFee: number,
+      total: number,
+      eventId?: string
+    }
 
     if (!attendees || attendees.length === 0 || !selectedTickets) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
