@@ -23,6 +23,7 @@ interface TicketCheckoutProps {
   selectedTickets: { [key: string]: number }
   onBack: () => void
   onClose: () => void
+  onUpdateTickets: (ticketId: string, quantity: number) => void
 }
 
 const ticketTypes: TicketType[] = [

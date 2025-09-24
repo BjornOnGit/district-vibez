@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import TicketCheckout from "@/components/ticket-checkout"
+import { TicketCheckout } from "@/components/ticket-checkout"
 
-export default function TicketCheckoutPage() {
+export default function TicketCheckoutPage(){
   const [selectedTickets, setSelectedTickets] = useState<{ [key: string]: number }>({})
   const router = useRouter()
 
@@ -14,24 +14,23 @@ export default function TicketCheckoutPage() {
       if (stored) {
         setSelectedTickets(JSON.parse(stored))
       } else {
-        // If no tickets, redirect back
         router.replace("/tickets")
       }
     }
   }, [router])
 
   if (!selectedTickets || Object.values(selectedTickets).every((qty) => qty === 0)) {
-    return null // or a loading/empty state
+    return null
   }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white">
-      <TicketCheckout
-        selectedTickets={selectedTickets}
-        onBack={() => router.push("/tickets")}
-        onClose={() => router.push("/")}
-        onUpdateTickets={() => {}}
-      />
+      <TicketCheckout 
+      selectedTickets={selectedTickets}
+      onBack={() => router.push("/tickets")}
+      onClose={() => router.push("/")}
+      onUpdateTickets={() => {}} 
+    />
     </div>
   )
 }
