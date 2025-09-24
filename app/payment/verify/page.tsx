@@ -9,11 +9,10 @@ export default function PaymentVerifyPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
-    const reference = params.get("reference")
-    const email = params.get("email") // <-- extract email from URL
+    const trxref = params.get("trxref") // Paystack's reference
 
-    if (reference && email) {
-      fetch(`/api/verify-payment?reference=${reference}&email=${email}`)
+    if (trxref) {
+      fetch(`/api/verify-payment?reference=${trxref}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.error) {
@@ -28,7 +27,7 @@ export default function PaymentVerifyPage() {
           setStatus("⚠️ Something went wrong during verification")
         })
     } else {
-      setStatus("⚠️ Missing payment reference or email")
+      setStatus("⚠️ Missing payment reference")
     }
   }, [])
 
