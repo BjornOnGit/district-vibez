@@ -70,16 +70,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Initialize Paystack transaction
+   // Inside your call
     const paystackResponse = await initializePaystack({
       email,
       amount,
-      metadata: {
+      metadata: JSON.stringify({
         attendeeIds: attendeeRecords.map((a) => a.id),
         eventId,
         selectedTickets,
-      },
+      }),
       callback_url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/payment/verify`,
     })
+
 
     if (!paystackResponse.status) {
       return NextResponse.json({ error: "Failed to initialize payment" }, { status: 500 })
