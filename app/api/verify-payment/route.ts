@@ -1,17 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabase/server"
 import { verifyPaystackTransaction } from "@/lib/paystack"
-import { sendTicketEmail } from "@/lib/email" // <-- adjust import path if needed
+import { sendTicketEmail } from "@/lib/email"
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const reference = searchParams.get("reference")
-    const email = searchParams.get("email") // new: pass email in query
 
-    if (!reference || !email) {
+    if (!reference) {
       return NextResponse.json(
-        { error: "Payment reference and email are required" },
+        { error: "Payment reference is required" },
         { status: 400 }
       )
     }
@@ -20,10 +19,21 @@ export async function GET(request: NextRequest) {
     const verification = await verifyPaystackTransaction(reference)
 
     if (!verification.status) {
-      return NextResponse.json({ error: "Payment verification failed" }, { status: 400 })
+      return NextResponse.json(
+        { error: "Payment verification failed" },
+        { status: 400 }
+      )
     }
 
     const { data: transaction } = verification
+    const email = transaction.customer?.email
+
+    if (!email) {
+      return NextResponse.json(
+        { error: "No customer email found in Paystack transaction" },
+        { status: 400 }
+      )
+    }
 
     // 2. Find attendee by email
     const { data: attendee, error: attendeeError } = await supabaseAdmin
@@ -36,7 +46,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Attendee record not found" }, { status: 404 })
     }
 
-    // 3. Insert payment log (idempotent: check first)
+    // 3. Insert payment log (idempotent)
     const { data: existingLog } = await supabaseAdmin
       .from("payment_logs")
       .select("*")
@@ -48,14 +58,14 @@ export async function GET(request: NextRequest) {
         {
           attendee_id: attendee.id,
           reference,
-          amount: transaction.amount / 100, // convert kobo → naira
+          amount: transaction.amount / 100, // kobo → naira
           status: transaction.status,
           paid_at: transaction.paid_at,
         },
       ])
     }
 
-    // 4. Update attendee: payment status, ticket_id, and paystack_ref
+    // 4. Update attendee with ticket + paystack_ref
     const ticketId =
       attendee.ticket_id || `EVT-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
 
@@ -68,13 +78,13 @@ export async function GET(request: NextRequest) {
       })
       .eq("id", attendee.id)
 
-    // 5. Send ticket email (idempotent if ticket_id already exists)
+    // 5. Send ticket email
     await sendTicketEmail({
       attendeeName: attendee.name,
       attendeeEmail: attendee.email,
       eventTitle: "District Vibez Block Party Vol.2",
-      eventDate: "Dec 21, 2025", // TODO: dynamically fetch from DB if multiple events
-      eventLocation: "Lagos, Nigeria", // TODO: fetch from DB
+      eventDate: "Dec 21, 2025", // TODO: dynamic later
+      eventLocation: "Lagos, Nigeria", // TODO: dynamic later
       ticketQuantity: attendee.ticket_quantity,
       ticketId,
       qrCodeData: ticketId,
@@ -92,6 +102,7 @@ export async function GET(request: NextRequest) {
         ticket_quantity: attendee.ticket_quantity,
         payment_status: "paid",
         ticket_id: ticketId,
+        paystack_ref: reference,
       },
     })
   } catch (error) {
