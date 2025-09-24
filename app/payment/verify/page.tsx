@@ -6,13 +6,16 @@ import { useEffect, useState } from "react"
 export const dynamic = "force-dynamic"
 
 export default function PaymentVerifyPage() {
-  const searchParams = useSearchParams()
-  const reference = searchParams.get("reference")
   const [status, setStatus] = useState("Verifying payment...")
+  const [reference, setReference] = useState<string | null>(null)
 
   useEffect(() => {
-    if (reference) {
-      fetch(`/api/verify-payment?reference=${reference}`)
+    const params = new URLSearchParams(window.location.search)
+    const ref = params.get("reference")
+    setReference(ref)
+
+    if (ref) {
+      fetch(`/api/verify-payment?reference=${ref}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.error) {
@@ -27,7 +30,7 @@ export default function PaymentVerifyPage() {
           setStatus("⚠️ Something went wrong during verification")
         })
     }
-  }, [reference])
+  }, [])
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
