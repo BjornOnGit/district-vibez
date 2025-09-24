@@ -1,21 +1,19 @@
 "use client"
 
-import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 
 export const dynamic = "force-dynamic"
 
 export default function PaymentVerifyPage() {
   const [status, setStatus] = useState("Verifying payment...")
-  const [reference, setReference] = useState<string | null>(null)
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
-    const ref = params.get("reference")
-    setReference(ref)
+    const reference = params.get("reference")
+    const email = params.get("email") // <-- extract email from URL
 
-    if (ref) {
-      fetch(`/api/verify-payment?reference=${ref}`)
+    if (reference && email) {
+      fetch(`/api/verify-payment?reference=${reference}&email=${email}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.error) {
@@ -29,6 +27,8 @@ export default function PaymentVerifyPage() {
         .catch(() => {
           setStatus("⚠️ Something went wrong during verification")
         })
+    } else {
+      setStatus("⚠️ Missing payment reference or email")
     }
   }, [])
 
