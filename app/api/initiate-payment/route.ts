@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         eventId,
         quantity,
       },
-      callback_url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}?payment=success`,
+      callback_url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/payment/verify`,
     })
 
     if (!paystackResponse.status) {
