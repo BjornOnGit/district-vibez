@@ -7,12 +7,16 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const reference = searchParams.get("reference")
+    const email = searchParams.get("email") // new: pass email in query
 
-    if (!reference) {
-      return NextResponse.json({ error: "Payment reference is required" }, { status: 400 })
+    if (!reference || !email) {
+      return NextResponse.json(
+        { error: "Payment reference and email are required" },
+        { status: 400 }
+      )
     }
 
-    // Verify transaction with Paystack
+    // 1. Verify transaction with Paystack
     const verification = await verifyPaystackTransaction(reference)
 
     if (!verification.status) {
@@ -21,18 +25,18 @@ export async function GET(request: NextRequest) {
 
     const { data: transaction } = verification
 
-    // Find attendee by reference
+    // 2. Find attendee by email
     const { data: attendee, error: attendeeError } = await supabaseAdmin
       .from("attendees")
       .select("*")
-      .eq("paystack_ref", reference)
+      .eq("email", email)
       .single()
 
     if (attendeeError || !attendee) {
       return NextResponse.json({ error: "Attendee record not found" }, { status: 404 })
     }
 
-    // 1. Insert payment log (idempotent: check first)
+    // 3. Insert payment log (idempotent: check first)
     const { data: existingLog } = await supabaseAdmin
       .from("payment_logs")
       .select("*")
@@ -51,20 +55,20 @@ export async function GET(request: NextRequest) {
       ])
     }
 
-    // 2. Generate Ticket ID (only if not already set)
-    const ticketId = attendee.ticket_id || `EVT-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+    // 4. Update attendee: payment status, ticket_id, and paystack_ref
+    const ticketId =
+      attendee.ticket_id || `EVT-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
 
-    if (!attendee.ticket_id) {
-      await supabaseAdmin
-        .from("attendees")
-        .update({
-          payment_status: "paid",
-          ticket_id: ticketId,
-        })
-        .eq("id", attendee.id)
-    }
+    await supabaseAdmin
+      .from("attendees")
+      .update({
+        payment_status: "paid",
+        ticket_id: ticketId,
+        paystack_ref: reference,
+      })
+      .eq("id", attendee.id)
 
-    // 3. Send email (only if not sent before)
+    // 5. Send ticket email (idempotent if ticket_id already exists)
     await sendTicketEmail({
       attendeeName: attendee.name,
       attendeeEmail: attendee.email,
