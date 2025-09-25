@@ -82,9 +82,9 @@ export async function GET(request: NextRequest) {
     await sendTicketEmail({
       attendeeName: attendee.name,
       attendeeEmail: attendee.email,
-      eventTitle: "District Vibez Block Party Vol.2",
-      eventDate: "Dec 21, 2025", // TODO: dynamic later
-      eventLocation: "Lagos, Nigeria", // TODO: dynamic later
+      eventTitle: "District Vibez",
+      eventDate: "Oct 11, 2025", // TODO: dynamic later
+      eventLocation: "VSP Lounge, Ikeja", // TODO: dynamic later
       ticketQuantity: attendee.ticket_quantity,
       ticketId,
       qrCodeData: ticketId,
