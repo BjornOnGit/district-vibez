@@ -26,27 +26,24 @@ export async function GET(request: NextRequest) {
     }
 
     const { data: transaction } = verification
-    const attendeeId = transaction.metadata?.attendeeId
+    const email = transaction.customer?.email
 
-    if (!attendeeId) {
+    if (!email) {
       return NextResponse.json(
-        { error: "No attendeeId found in transaction metadata" },
+        { error: "No customer email found in Paystack transaction" },
         { status: 400 }
       )
     }
 
-    // 2. Find attendee by ID (safer than email)
+    // 2. Find attendee by email
     const { data: attendee, error: attendeeError } = await supabaseAdmin
       .from("attendees")
       .select("*")
-      .eq("id", attendeeId)
+      .eq("email", email)
       .single()
 
     if (attendeeError || !attendee) {
-      return NextResponse.json(
-        { error: "Attendee record not found" },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "Attendee record not found" }, { status: 404 })
     }
 
     // 3. Insert payment log (idempotent)
@@ -72,31 +69,22 @@ export async function GET(request: NextRequest) {
     const ticketId =
       attendee.ticket_id || `EVT-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
 
-    const { error: updateError } = await supabaseAdmin
+    await supabaseAdmin
       .from("attendees")
       .update({
         payment_status: "paid",
         ticket_id: ticketId,
         paystack_ref: reference,
-        paid_at: transaction.paid_at,
       })
       .eq("id", attendee.id)
 
-    if (updateError) {
-      console.error("Failed to update attendee:", updateError)
-      return NextResponse.json(
-        { error: "Failed to update attendee record" },
-        { status: 500 }
-      )
-    }
-
-    // 5. Send ticket email (only once, idempotent if ticket_id already exists)
+    // 5. Send ticket email
     await sendTicketEmail({
       attendeeName: attendee.name,
       attendeeEmail: attendee.email,
       eventTitle: "District Vibez Block Party Vol.2",
-      eventDate: "Dec 21, 2025", // TODO: make dynamic from DB
-      eventLocation: "Lagos, Nigeria", // TODO: make dynamic
+      eventDate: "Dec 21, 2025", // TODO: dynamic later
+      eventLocation: "Lagos, Nigeria", // TODO: dynamic later
       ticketQuantity: attendee.ticket_quantity,
       ticketId,
       qrCodeData: ticketId,
