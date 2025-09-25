@@ -15,7 +15,7 @@ type TicketType = {
 
 type TicketCheckoutProps = {
   selectedTickets: Record<string, number>
-  ticketTypes: TicketType[]
+  ticketTypes?: TicketType[] // <-- make optional for safety
   onUpdateTickets: (ticketId: string, quantity: number) => void
   onBack: () => void
   onCheckout: () => Promise<void>
@@ -23,19 +23,21 @@ type TicketCheckoutProps = {
 
 export function TicketCheckout({
   selectedTickets,
-  ticketTypes,
+  ticketTypes = [], // <-- default to empty array
   onUpdateTickets,
   onBack,
   onCheckout,
 }: TicketCheckoutProps) {
   const [isLoading, setIsLoading] = useState(false)
 
+  // ✅ safeguard subtotal reduce
   const subtotal = Object.entries(selectedTickets).reduce((acc, [ticketId, qty]) => {
+    if (!ticketTypes?.length) return acc
     const ticket = ticketTypes.find((t) => t.id === ticketId)
     return ticket ? acc + ticket.price * qty : acc
   }, 0)
 
-  const SERVICE_FEE = 200 // flat fee, adjust if dynamic
+  const SERVICE_FEE = 200
   const total = subtotal + SERVICE_FEE
 
   const formatPrice = (amount: number) =>
@@ -59,36 +61,40 @@ export function TicketCheckout({
             <CardTitle>Tickets Selected</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {Object.entries(selectedTickets).map(([ticketId, quantity]) => {
-              const ticket = ticketTypes.find((t) => t.id === ticketId)
-              if (!ticket || quantity === 0) return null
+            {ticketTypes?.length > 0 ? (
+              Object.entries(selectedTickets).map(([ticketId, quantity]) => {
+                const ticket = ticketTypes.find((t) => t.id === ticketId)
+                if (!ticket || quantity === 0) return null
 
-              return (
-                <div key={ticketId} className="flex items-center justify-between">
-                  <span className="font-medium">{ticket.name}</span>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 w-8 p-0 bg-transparent"
-                      onClick={() => onUpdateTickets(ticketId, quantity - 1)}
-                      disabled={quantity <= 1}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                    <span className="font-semibold">{quantity}</span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 w-8 p-0 bg-transparent"
-                      onClick={() => onUpdateTickets(ticketId, quantity + 1)}
-                    >
-                      <Plus className="w-4 h-4" />
-                    </Button>
+                return (
+                  <div key={ticketId} className="flex items-center justify-between">
+                    <span className="font-medium">{ticket.name}</span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-8 p-0 bg-transparent"
+                        onClick={() => onUpdateTickets(ticketId, quantity - 1)}
+                        disabled={quantity <= 1}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                      <span className="font-semibold">{quantity}</span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-8 p-0 bg-transparent"
+                        onClick={() => onUpdateTickets(ticketId, quantity + 1)}
+                      >
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              )
-            })}
+                )
+              })
+            ) : (
+              <p className="text-gray-500 text-sm">No tickets loaded yet.</p>
+            )}
           </CardContent>
         </Card>
 
@@ -131,17 +137,23 @@ export function TicketCheckout({
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              {Object.entries(selectedTickets).map(([ticketId, quantity]) => {
-                const ticket = ticketTypes.find((t) => t.id === ticketId)
-                if (!ticket || quantity === 0) return null
+              {ticketTypes?.length > 0 ? (
+                Object.entries(selectedTickets).map(([ticketId, quantity]) => {
+                  const ticket = ticketTypes.find((t) => t.id === ticketId)
+                  if (!ticket || quantity === 0) return null
 
-                return (
-                  <div key={ticketId} className="flex justify-between text-sm">
-                    <span>{ticket.name} × {quantity}</span>
-                    <span>{formatPrice(ticket.price * quantity)}</span>
-                  </div>
-                )
-              })}
+                  return (
+                    <div key={ticketId} className="flex justify-between text-sm">
+                      <span>
+                        {ticket.name} × {quantity}
+                      </span>
+                      <span>{formatPrice(ticket.price * quantity)}</span>
+                    </div>
+                  )
+                })
+              ) : (
+                <p className="text-gray-500 text-sm">No tickets in order.</p>
+              )}
             </div>
 
             <div className="border-t pt-4 space-y-2 text-sm">
