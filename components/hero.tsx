@@ -10,7 +10,7 @@ export function Hero() {
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
-        <img src="/district-vibez-hero.jpg" alt="District Vibez" className="w-full h-full object-cover" />
+        <img src="/district-vibez-hero-img-2.jpg" alt="District Vibez" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/50" />
       </div>
 
