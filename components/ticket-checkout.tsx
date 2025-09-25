@@ -28,14 +28,9 @@ interface TicketCheckoutProps {
 
 const ticketTypes: TicketType[] = [
   {
-    id: "rockstar-earlybird",
-    name: "Rockstar - Earlybird",
-    price: 750000,
-  },
-  {
-    id: "legend-earlybird",
-    name: "Legend - Earlybird",
-    price: 2500000,
+    id: "regular",
+    name: "Regular",
+    price: 50000,
   },
 ]
 

@@ -33,10 +33,10 @@ export function Hero() {
               <MapPin className="w-5 h-5" />
               <span>VSP Lounge, Ikeja, Lagos</span>
             </div>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <Users className="w-5 h-5" />
               <span>300+ Attendees</span>
-            </div>
+            </div> */}
           </div>
 
           <Button

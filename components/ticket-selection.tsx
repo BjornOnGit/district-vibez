@@ -18,16 +18,10 @@ interface TicketSelectionProps {
 
 const ticketTypes: TicketType[] = [
   {
-    id: "rockstar-earlybird",
-    name: "Rockstar - Earlybird",
+    id: "regular",
+    name: "Regular",
     description: "General Access",
-    price: 750000, // 7,500.00 in kobo
-  },
-  {
-    id: "legend-earlybird",
-    name: "Legend - Earlybird",
-    description: "General Access + Stage Access",
-    price: 2500000, // 25,000.00 in kobo
+    price: 50000, // 7,500.00 in kobo
   },
 ]
 
