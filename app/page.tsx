@@ -99,7 +99,7 @@ export default function HomePage() {
       <Hero />
       <EventDetails />
       {/* <PartnersSection /> */}
-      <FoundationPlaylistSection />
+      {/* <FoundationPlaylistSection /> */}
 
       {/* <Modal
         isOpen={isTicketModalOpen}

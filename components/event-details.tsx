@@ -19,11 +19,6 @@ export function EventDetails() {
       description: "VSP Lounge, Ikeja, Lagos",
     },
     {
-      icon: Users,
-      title: "Capacity",
-      description: "300+ Party Lovers",
-    },
-    {
       icon: Music,
       title: "Artists",
       description: "4 Top Performers",
