@@ -30,7 +30,7 @@ const ticketTypes: TicketType[] = [
   {
     id: "regular",
     name: "Regular",
-    price: 50000,
+    price: 500000,
   },
 ]
 

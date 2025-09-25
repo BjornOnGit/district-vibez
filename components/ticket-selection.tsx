@@ -21,7 +21,7 @@ const ticketTypes: TicketType[] = [
     id: "regular",
     name: "Regular",
     description: "General Access",
-    price: 50000, // 7,500.00 in kobo
+    price: 500000, // 7,500.00 in kobo
   },
 ]
 
