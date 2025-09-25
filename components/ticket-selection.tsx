@@ -21,7 +21,7 @@ const ticketTypes: TicketType[] = [
     id: "regular",
     name: "Regular",
     description: "General Access",
-    price: 500000, // 7,500.00 in kobo
+    price: 500000, // 5,000.00 in kobo
   },
 ]
 
@@ -44,12 +44,12 @@ export function TicketSelection({ onGetTickets }: TicketSelectionProps) {
   return (
     <div className="max-w-2xl mx-auto p-6">
       {/* Add to Calendar Button */}
-      <div className="mb-6">
+      {/* <div className="mb-6">
         <Button variant="outline" className="border-yellow-400 text-black hover:bg-yellow-50 bg-transparent">
           <Calendar className="w-4 h-4 mr-2" />
           Add to calendar
         </Button>
-      </div>
+      </div> */}
 
       {/* Tickets Section */}
       <Card className="mb-6">
@@ -105,6 +105,14 @@ export function TicketSelection({ onGetTickets }: TicketSelectionProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Reservation Note */}
+      <div className="max-w-2xl mx-auto mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
+        <p className="text-gray-800 font-medium">
+          For table reservations (4 or 6 people), please call{" "}
+          <span className="font-bold text-black">+2347037435892, +2349030771023, +2348175276395</span>.
+        </p>
+      </div>
     </div>
   )
 }
