@@ -33,7 +33,7 @@ const ticketTypes: TicketType[] = [
   },
 ]
 
-const SERVICE_FEE = 39500 // 495.00 in kobo
+const SERVICE_FEE = 27000 // 270.00 in kobo
 
 export function TicketCheckout({ selectedTickets, onBack, onClose }: TicketCheckoutProps) {
   const [attendees, setAttendees] = useState<AttendeeInfo[]>([])
