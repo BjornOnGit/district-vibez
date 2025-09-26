@@ -1,46 +1,48 @@
 "use client"
 
-import { useEffect, useState } from "react"
-
-export const dynamic = "force-dynamic"
+import { useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 
 export default function PaymentVerifyPage() {
-  const [status, setStatus] = useState("Verifying payment...")
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const reference = searchParams.get("reference")
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const trxref = params.get("trxref") // Paystack's reference
+    const verifyPayment = async () => {
+      if (!reference) {
+        router.push("/") // No reference → back home
+        return
+      }
 
-    if (trxref) {
-      fetch(`/api/verify-payment?reference=${trxref}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.error) {
-            setStatus(`❌ ${data.error}`)
-          } else if (data.status === "success") {
-            setStatus("✅ Payment successful! Ticket sent to your email.")
-          } else {
-            setStatus(`⚠️ Payment status: ${data.status}`)
-          }
-        })
-        .catch(() => {
-          setStatus("⚠️ Something went wrong during verification")
-        })
-    } else {
-      setStatus("⚠️ Missing payment reference")
+      try {
+        const res = await fetch(`/api/verify-payment?reference=${reference}`)
+        const data = await res.json()
+
+        if (!res.ok || !data.success) {
+          console.error("Verification failed:", data.error)
+          router.push("/") // Always redirect home
+          return
+        }
+
+        // ✅ Verification passed
+        router.push("/")
+      } catch (err) {
+        console.error("Error verifying payment:", err)
+        router.push("/")
+      }
     }
-  }, [])
+
+    verifyPayment()
+  }, [reference, router])
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="p-8 bg-white shadow rounded text-center">
-        <h1 className="text-2xl font-bold mb-4">{status}</h1>
-        {status.startsWith("✅") && (
-          <p className="text-gray-600">
-            Your ticket has been emailed to you. Please check your inbox 📩
-          </p>
-        )}
-      </div>
+    <div className="flex flex-col items-center justify-center h-screen">
+      {/* Spinner */}
+      <div className="animate-spin rounded-full h-16 w-16 border-4 border-yellow-400 border-t-transparent"></div>
+      <p className="mt-4 text-lg font-semibold text-gray-700">
+        Verifying your payment...
+      </p>
     </div>
   )
 }
