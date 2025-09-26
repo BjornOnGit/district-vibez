@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
         eventId,
         selectedTickets,
       }),
-      callback_url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/payment/verify`,
+      callback_url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}?payment=success`,
     })
 
 
