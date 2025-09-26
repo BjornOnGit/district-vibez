@@ -1,14 +1,14 @@
 "use client"
 
 import { useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 
 export const dynamic = "force-dynamic"
 
 export default function PaymentVerifyPage() {
   const router = useRouter()
-  const searchParams = new URLSearchParams(window.location.search)
-  const reference = searchParams.get("reference")
+  const params = new URLSearchParams(window.location.search)
+  const reference = params.get("reference")
 
   useEffect(() => {
     const verifyPayment = async () => {
